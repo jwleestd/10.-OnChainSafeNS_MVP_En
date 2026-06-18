@@ -5,30 +5,66 @@ import { AdminApproveRequest, AdminApproveResponse } from '@/types';
 import { sendApprovalResult } from '@/lib/email';
 import { RISK_ESCALATION } from '@/lib/constants';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/v1/admin/approve
  * QRY-ADMIN-001: 대기 중인 신고 목록 조회
  */
-async function getPendingReportsHandler(req: NextRequest) {
+async function getPendingReportsHandler() {
   const reports = await prisma.fraudReport.findMany({
     where: { status: 'submitted' },
     orderBy: { reportedAt: 'asc' },
-    select: {
-      reportId: true,
-      reportedAddress: true,
-      chain: true,
-      description: true,
-      evidenceUrl: true,
-      reportedAt: true,
+    include: {
       reporter: {
         select: {
-          email: true
-        }
-      }
-    }
+          email: true,
+          falseReportCount: true,
+        },
+      },
+    },
   });
 
-  return successResponse(reports);
+  const reportsWithContext = await Promise.all(
+    reports.map(async (report) => {
+      const [sameAddressReportCount, existingFraudAddress] = await Promise.all([
+        prisma.fraudReport.count({
+          where: {
+            reportedAddress: report.reportedAddress,
+            chain: report.chain,
+          },
+        }),
+        prisma.fraudAddress.findFirst({
+          where: {
+            address: report.reportedAddress,
+            chain: report.chain,
+          },
+          select: {
+            fraudId: true,
+            riskLevel: true,
+            reportCount: true,
+            sourceType: true,
+            status: true,
+          },
+        }),
+      ]);
+
+      return {
+        reportId: report.reportId,
+        reportedAddress: report.reportedAddress,
+        chain: report.chain,
+        description: report.description,
+        evidenceUrl: report.evidenceUrl,
+        reportedAt: report.reportedAt,
+        reporter: report.reporter,
+        sameAddressReportCount,
+        existingFraudAddress,
+        reporterFalseReportCount: report.reporter.falseReportCount,
+      };
+    }),
+  );
+
+  return successResponse(reportsWithContext);
 }
 
 /**
@@ -57,7 +93,7 @@ async function approveReportHandler(req: NextRequest) {
   }
 
   const now = new Date();
-  let finalStatus: 'approved' | 'rejected' = action === 'approve' ? 'approved' : 'rejected';
+  const finalStatus: 'approved' | 'rejected' = action === 'approve' ? 'approved' : 'rejected';
   let createdFraudAddressId: string | undefined;
 
   // DB 트랜잭션
@@ -129,7 +165,7 @@ async function approveReportHandler(req: NextRequest) {
 
   return successResponse<AdminApproveResponse>({
     report_id,
-    status: finalStatus as any,
+    status: finalStatus,
     fraud_address_id: createdFraudAddressId,
     reviewed_at: now.toISOString(),
   });

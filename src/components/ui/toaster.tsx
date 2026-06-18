@@ -8,7 +8,6 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-  type ToastProps,
 } from "@/components/ui/toast"
 
 export function Toaster() {

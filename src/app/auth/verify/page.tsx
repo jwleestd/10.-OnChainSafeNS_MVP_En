@@ -7,7 +7,7 @@ import { Loader2, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp"
 import { useToast } from "@/hooks/use-toast"
 
@@ -39,7 +39,7 @@ export default function VerifyEmailPage() {
       } else {
         toast({ variant: "destructive", title: "발송 실패", description: data.error.message })
       }
-    } catch (error) {
+    } catch {
       toast({ variant: "destructive", title: "에러 발생", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)
@@ -61,11 +61,12 @@ export default function VerifyEmailPage() {
 
       if (data.success) {
         toast({ title: "인증 완료", description: "성공적으로 로그인되었습니다." })
-        router.push("/fraud-lookup") // 인증 완료 후 메인 서비스로 이동
+        const redirect = new URLSearchParams(window.location.search).get("redirect")
+        router.push(redirect?.startsWith("/") ? redirect : "/fraud-lookup")
       } else {
         toast({ variant: "destructive", title: "인증 실패", description: data.error.message })
       }
-    } catch (error) {
+    } catch {
       toast({ variant: "destructive", title: "에러 발생", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)

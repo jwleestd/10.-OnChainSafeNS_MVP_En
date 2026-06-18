@@ -7,7 +7,7 @@ import { Loader2, Lock, ShieldAlert } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 
 export default function AdminLoginPage() {
@@ -41,7 +41,7 @@ export default function AdminLoginPage() {
         setLoading(false)
       }, 1000)
 
-    } catch (error) {
+    } catch {
       toast({ variant: "destructive", title: "에러 발생", description: "서버와 통신할 수 없습니다." })
       setLoading(false)
     }

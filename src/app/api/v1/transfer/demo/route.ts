@@ -6,6 +6,9 @@ import { getUserSession } from '@/lib/auth';
 import { TransferDemoRequest, TransferDemoResponse } from '@/types';
 import { sendTransferNotification } from '@/lib/email';
 import { ERROR_MESSAGES } from '@/lib/constants';
+import type { FraudStatus, TransferStatus } from '@/lib/constants';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/v1/transfer/demo
@@ -58,9 +61,9 @@ async function transferDemoHandler(req: NextRequest) {
       resolved_address: null,
       chain: null,
       amount: demoRecord.amount,
-      fraud_status: demoRecord.fraudStatus as any,
+      fraud_status: demoRecord.fraudStatus as FraudStatus,
       fraud_detail: demoRecord.fraudDetail,
-      transfer_status: demoRecord.transferStatus as any,
+      transfer_status: demoRecord.transferStatus as TransferStatus,
       created_at: demoRecord.createdAt.toISOString(),
     });
   }
@@ -77,7 +80,7 @@ async function transferDemoHandler(req: NextRequest) {
   const isFlagged = !!fraudRecord;
   const transferStatus = isFlagged ? 'blocked' : 'completed';
   const fraudStatus = isFlagged ? 'flagged' : 'clean';
-  let fraudDetail = null;
+  let fraudDetail: string | null = null;
 
   if (isFlagged) {
     fraudDetail = JSON.stringify({
@@ -125,9 +128,9 @@ async function transferDemoHandler(req: NextRequest) {
     resolved_address: demoRecord.resolvedAddress,
     chain: demoRecord.chain,
     amount: demoRecord.amount,
-    fraud_status: demoRecord.fraudStatus as any,
+    fraud_status: demoRecord.fraudStatus as FraudStatus,
     fraud_detail: demoRecord.fraudDetail,
-    transfer_status: demoRecord.transferStatus as any,
+    transfer_status: demoRecord.transferStatus as TransferStatus,
     created_at: demoRecord.createdAt.toISOString(),
   });
 }

@@ -6,6 +6,9 @@ import { sendReportConfirmation } from '@/lib/email';
 import { getUserSession } from '@/lib/auth';
 import { FraudReportRequest, FraudReportResponse } from '@/types';
 import { ERROR_MESSAGES } from '@/lib/constants';
+import type { FraudReportStatus } from '@/lib/constants';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/v1/fraud/report
@@ -104,7 +107,7 @@ async function fraudReportHandler(req: NextRequest) {
 
   return successResponse<FraudReportResponse>({
     report_id: result.reportId,
-    status: result.status as any,
+    status: result.status as FraudReportStatus,
     reported_at: result.reportedAt.toISOString(),
   });
 }

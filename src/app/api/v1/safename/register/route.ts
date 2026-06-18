@@ -6,6 +6,8 @@ import { getUserSession } from '@/lib/auth';
 import { SafeNameRegisterRequest, SafeNameRegisterResponse } from '@/types';
 import { ERROR_MESSAGES } from '@/lib/constants';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * POST /api/v1/safename/register
  * CMD-SN-001~002: Safe-Name 등록

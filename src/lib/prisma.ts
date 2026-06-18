@@ -5,6 +5,7 @@
 import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { e2eMemoryPrisma } from './e2e-memory-prisma';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -22,6 +23,11 @@ function createPrismaClient(): PrismaClient {
   });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+export const prisma =
+  process.env.E2E_MEMORY_DB === '1'
+    ? (e2eMemoryPrisma as unknown as PrismaClient)
+    : (globalForPrisma.prisma ?? createPrismaClient());
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production' && process.env.E2E_MEMORY_DB !== '1') {
+  globalForPrisma.prisma = prisma;
+}

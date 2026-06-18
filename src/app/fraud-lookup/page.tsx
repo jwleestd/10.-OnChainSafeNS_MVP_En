@@ -114,7 +114,7 @@ function LookupTab() {
       } else {
         toast({ variant: "destructive", title: "조회 실패", description: data.error.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)
@@ -236,7 +236,7 @@ function ReportTab() {
       } else {
         toast({ variant: "destructive", title: "신고 실패", description: data.error.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)

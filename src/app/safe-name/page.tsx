@@ -101,7 +101,7 @@ function RegisterTab() {
       } else {
         toast({ variant: "destructive", title: "등록 실패", description: data.error.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)
@@ -204,7 +204,7 @@ function ResolveTab() {
       } else {
         setError(data.error.message)
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)
@@ -342,7 +342,7 @@ function TransferTab() {
       } else {
         toast({ variant: "destructive", title: "이체 실패", description: data.error.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)

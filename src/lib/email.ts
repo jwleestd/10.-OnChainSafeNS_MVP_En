@@ -5,14 +5,25 @@
 // ============================================
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const fromEmail = process.env.FROM_EMAIL || 'noreply@example.com';
+
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.error('[Email] RESEND_API_KEY is not configured');
+    return null;
+  }
+  return new Resend(apiKey);
+}
 
 /**
  * 이메일 인증 코드 발송 (REQ-P0-014)
  */
 export async function sendVerificationCode(email: string, code: string): Promise<boolean> {
   try {
+    const resend = getResendClient();
+    if (!resend) return false;
+
     await resend.emails.send({
       from: fromEmail,
       to: email,
@@ -43,6 +54,9 @@ export async function sendReportConfirmation(
   report: { reportedAddress: string; chain: string }
 ): Promise<boolean> {
   try {
+    const resend = getResendClient();
+    if (!resend) return false;
+
     await resend.emails.send({
       from: fromEmail,
       to: email,
@@ -76,6 +90,9 @@ export async function sendApprovalResult(
   const emoji = result.action === 'approved' ? '✅' : '❌';
 
   try {
+    const resend = getResendClient();
+    if (!resend) return false;
+
     await resend.emails.send({
       from: fromEmail,
       to: email,
@@ -118,6 +135,9 @@ export async function sendTransferNotification(
   const statusText = isBlocked ? '이체 차단' : '이체 완료 (시뮬레이션)';
 
   try {
+    const resend = getResendClient();
+    if (!resend) return false;
+
     await resend.emails.send({
       from: fromEmail,
       to: email,

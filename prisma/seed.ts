@@ -19,6 +19,7 @@ const prisma = new PrismaClient({ adapter });
 // ─────────────────────────────────────────────
 const chains = ['ethereum', 'polygon', 'bsc', 'solana'] as const;
 const riskLevels = ['critical', 'high', 'medium', 'low'] as const;
+const FRAUD_REPORT_CAPACITY_COUNT = 100;
 
 // 분포: ethereum 15, polygon 8, bsc 4, solana 3
 const chainDistribution = [
@@ -174,17 +175,45 @@ async function seedOperator() {
 // ─────────────────────────────────────────────
 // SEED-003: 정합성 자동 검증 (REQ-P0-NF-005)
 // ─────────────────────────────────────────────
+async function seedFraudReportCapacity(userIds: string[]) {
+  console.log('\n[capacity] FRAUD_REPORT 100-row capacity seed...');
+
+  const reports = Array.from({ length: FRAUD_REPORT_CAPACITY_COUNT }, (_, index) => {
+    const manualAddress = manualFraudAddresses[index % manualFraudAddresses.length];
+
+    return {
+      reporterId: userIds[index % userIds.length],
+      reportedAddress:
+        index % 2 === 0 ? faker.finance.ethereumAddress() : manualAddress.address,
+      chain: index % 2 === 0 ? chains[index % chains.length] : manualAddress.chain,
+      description: `Phase-0 capacity verification report ${index + 1}`,
+      evidenceUrl: `https://example.com/evidence/phase-0-capacity-${index + 1}`,
+      status: 'submitted',
+    };
+  });
+
+  await prisma.fraudReport.createMany({ data: reports });
+  console.log(`OK FRAUD_REPORT ${FRAUD_REPORT_CAPACITY_COUNT} rows created`);
+}
+
 async function verifySeeds() {
   console.log('\n🔍 시드 데이터 정합성 검증 중...');
 
   const counts = {
     fraudAddresses: await prisma.fraudAddress.count(),
+    fraudReports: await prisma.fraudReport.count(),
     safeNames: await prisma.safeName.count(),
     users: await prisma.user.count(),
     operators: await prisma.operator.count(),
   };
 
-  const expected = { fraudAddresses: 30, safeNames: 10, users: 5, operators: 1 };
+  const expected = {
+    fraudAddresses: 30,
+    fraudReports: FRAUD_REPORT_CAPACITY_COUNT,
+    safeNames: 10,
+    users: 5,
+    operators: 1,
+  };
   let allPassed = true;
 
   for (const [key, expectedCount] of Object.entries(expected)) {
@@ -226,6 +255,7 @@ async function main() {
   const userIds = users.map((u) => u.userId);
   await seedSafeNames(userIds);
   await seedOperator();
+  await seedFraudReportCapacity(userIds);
 
   // 정합성 검증
   await verifySeeds();

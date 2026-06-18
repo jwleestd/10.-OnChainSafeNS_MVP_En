@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Loader2, Check, X, FileWarning } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,7 @@ export default function AdminApprovalPage() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const { toast } = useToast()
 
-  const fetchPendingReports = async () => {
+  const fetchPendingReports = useCallback(async () => {
     setLoading(true)
     try {
       const res = await fetch("/api/v1/admin/approve")
@@ -44,14 +44,14 @@ export default function AdminApprovalPage() {
       } else {
         toast({ variant: "destructive", title: "목록 조회 실패", description: data.error?.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
-  useEffect(() => { fetchPendingReports() }, [])
+  useEffect(() => { fetchPendingReports() }, [fetchPendingReports])
 
   const handleAction = async (reportId: string, action: "approve" | "reject", notes?: string) => {
     setActionLoading(reportId)
@@ -74,7 +74,7 @@ export default function AdminApprovalPage() {
       } else {
         toast({ variant: "destructive", title: "처리 실패", description: data.error.message })
       }
-    } catch (err) {
+    } catch {
       toast({ variant: "destructive", title: "에러", description: "서버와 통신할 수 없습니다." })
     } finally {
       setActionLoading(null)
