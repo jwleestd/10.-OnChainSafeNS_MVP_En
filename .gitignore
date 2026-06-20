@@ -8,6 +8,8 @@
 
 # testing
 /coverage
+/playwright-report
+/test-results
 
 # next.js
 /.next/
@@ -34,3 +36,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated
+/src/generated/prisma
+
+# agent/local run artifacts
+/.agents/skills
+/.omo
+/docs/goals
+
+# local notes
+강의 내역 궁금 내역.txt
