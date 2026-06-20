@@ -4,6 +4,7 @@ import { successResponse, errorResponse, withErrorHandler } from '@/lib/api-resp
 import { AdminApproveRequest, AdminApproveResponse } from '@/types';
 import { sendApprovalResult } from '@/lib/email';
 import { RISK_ESCALATION } from '@/lib/constants';
+import { getAdminSession } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,11 @@ export const dynamic = 'force-dynamic';
  * QRY-ADMIN-001: 대기 중인 신고 목록 조회
  */
 async function getPendingReportsHandler() {
+  const session = await getAdminSession();
+  if (!session) {
+    return errorResponse('UNAUTHORIZED', 'Admin authentication is required.', 401);
+  }
+
   const reports = await prisma.fraudReport.findMany({
     where: { status: 'submitted' },
     orderBy: { reportedAt: 'asc' },
@@ -72,6 +78,11 @@ async function getPendingReportsHandler() {
  * CMD-ADMIN-001~003: 신고 승인/거부 처리
  */
 async function approveReportHandler(req: NextRequest) {
+  const session = await getAdminSession();
+  if (!session) {
+    return errorResponse('UNAUTHORIZED', 'Admin authentication is required.', 401);
+  }
+
   const body = (await req.json()) as AdminApproveRequest;
   const { report_id, action, reviewer_notes } = body;
 

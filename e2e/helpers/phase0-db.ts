@@ -25,7 +25,7 @@ const userIdsByEmail = new Map<string, string>([
 ]);
 
 const jwtSecret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only',
+  process.env.JWT_SECRET || 'phase0-e2e-jwt-secret-with-at-least-32-bytes',
 );
 
 async function signCookie(

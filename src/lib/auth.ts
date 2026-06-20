@@ -1,9 +1,13 @@
 import { jwtVerify, SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only'
-);
+function getJwtSecret() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET is required to sign or verify sessions.');
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export interface UserSession {
   userId: string;
@@ -27,7 +31,7 @@ export async function signToken(payload: SessionPayload, expiresIn: string = '24
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(expiresIn)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 /**
@@ -35,7 +39,7 @@ export async function signToken(payload: SessionPayload, expiresIn: string = '24
  */
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as unknown as SessionPayload;
   } catch {
     return null;

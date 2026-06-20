@@ -24,6 +24,9 @@ export default defineConfig({
     url: BASE_URL,
     env: {
       E2E_MEMORY_DB: '1',
+      ADMIN_ID: 'admin',
+      ADMIN_PASSWORD: 'phase0-e2e-admin-password',
+      JWT_SECRET: 'phase0-e2e-jwt-secret-with-at-least-32-bytes',
       RESEND_API_KEY: '',
     },
     reuseExistingServer: !process.env.CI,

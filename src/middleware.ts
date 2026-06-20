@@ -3,17 +3,17 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose/jwt/verify';
 
 const USER_PROTECTED_ROUTES = ['/fraud-lookup', '/safe-name'];
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only',
-);
 
 type MiddlewareSession = {
   role?: 'user' | 'admin';
 };
 
 async function verifyToken(token: string): Promise<MiddlewareSession | null> {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) return null;
+
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(jwtSecret));
     return payload as MiddlewareSession;
   } catch {
     return null;
@@ -36,7 +36,7 @@ function unauthorizedResponse(message: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/api/v1/admin')) {
+  if (pathname.startsWith('/api/v1/admin') && pathname !== '/api/v1/admin/login') {
     const token = request.cookies.get('admin_session')?.value;
     if (!token) {
       return unauthorizedResponse('Admin authentication is required.');
