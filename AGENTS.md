@@ -12,3 +12,13 @@
 - T8: Phase-0 completion requires Playwright E2E from the start. Automate the 19 REQ-P0-001~019 scenarios in Playwright and require the suite to be fully green before Phase-1a transition. Manual checklist runs are only supporting demo rehearsal and visual verification, not a substitute for Playwright.
 - T9: Use the reduced Phase-0 seed scale as the source of truth: `FRAUD_ADDRESS 30 + SAFE_NAME 10 + USER 5 + OPERATOR 1`. Scalability acceptance uses `FRAUD_REPORT 100`. Do not implement or test against the older `FRAUD_ADDRESS 100 + SAFE_NAME 20 + FRAUD_REPORT 500` Phase-0 target unless a later Grill Ledger decision supersedes this.
 - T10: Use the SRS cost gates with custom-domain cost included: Phase-0 monthly cost must be `<= $22`, Phase-1a `<= $86`, and Phase-1b-to-Phase-2 gate `<= $140`. Do not use the older `$21`, `~$71`, or `<= $100` figures as current phase-gate criteria.
+
+## PlayBoard SoT
+
+- The PlayBoard registry under `src/playboard/registry` is the current implementation/status SoT for PlayBoard surfaces.
+- PRD, SRS, task, and Grill Ledger documents remain source references. When those references and PlayBoard status disagree, update the PlayBoard registry first, then update the source document if the underlying decision changed.
+- Any requirement, route, state, policy, design, or work-item change that affects PlayBoard must update the relevant registry entry in the same PR/change set.
+- PlayBoard pages must derive screen lists, counts, coverage, waves, and flow walkthroughs from registry data only. Do not hard-code parallel lists inside route pages.
+- Status transitions stay fixed: screens move `planned -> partial -> implemented -> verified`, and work items move `not_started -> review_ready -> done`.
+- `/playboard/**` is local-development visible by default. Preview/production exposure requires `PLAYBOARD_ENABLED=true`; otherwise it should return 404.
+- Board health checks must stay green before merge: registry integrity, route smoke tests, and the existing Phase-0 Playwright suite.
